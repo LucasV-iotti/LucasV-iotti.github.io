@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Missões Espaciais - Jogo de Recuperação</title>
+    <title>Arquivo Confidencial - Missão Espacial</title>
     <style>
         * {
             margin: 0;
@@ -12,547 +12,462 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #0f0f23, #1a1a3e, #2d1b69);
-            min-height: 100vh;
-            color: white;
-            overflow-x: hidden;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e0e6ed;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
         }
 
         .stars {
-            position: fixed;
-            top: 0;
-            left: 0;
+            position: absolute;
             width: 100%;
             height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle 3s infinite;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent);
+            background-repeat: repeat;
+            background-size: 200px 150px;
+            animation: twinkle 3s ease-in-out infinite alternate;
         }
 
         @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
+            from { opacity: 0.8; }
+            to { opacity: 1; }
         }
 
         .container {
             position: relative;
             z-index: 10;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
+            align-items: center;
+            padding: 15px;
+            overflow-y: auto;
         }
 
         .screen {
-            display: none;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 40px;
-            border-radius: 20px;
-            border: 2px solid #4a90e2;
-            box-shadow: 0 0 30px rgba(74, 144, 226, 0.3);
+            background: rgba(20, 30, 50, 0.95);
+            border: 2px solid #4a9eff;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 95vh;
+            box-shadow: 0 0 30px rgba(74, 158, 255, 0.3);
+            position: relative;
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
         }
 
-        .screen.active {
-            display: block;
-            animation: slideIn 0.5s ease-out;
+        .screen::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #4a9eff, #74b9ff, #0984e3, #4a9eff);
+            border-radius: 15px;
+            z-index: -1;
+            animation: pulse 2s ease-in-out infinite alternate;
         }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .rocket {
-            font-size: 60px;
-            margin-bottom: 20px;
-            animation: float 2s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+        @keyframes pulse {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
         }
 
         h1 {
-            color: #4a90e2;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+            text-align: center;
+            color: #74b9ff;
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px #74b9ff;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #74b9ff; }
+            to { text-shadow: 0 0 30px #74b9ff, 0 0 40px #74b9ff; }
         }
 
         .input-group {
-            margin: 20px 0;
-            text-align: left;
+            margin: 15px 0;
         }
 
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #ccc;
+            margin-bottom: 8px;
+            color: #4a9eff;
+            font-weight: bold;
         }
 
         input {
             width: 100%;
             padding: 12px;
-            border: 2px solid #4a90e2;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #4a9eff;
+            border-radius: 8px;
+            color: #e0e6ed;
+            font-family: 'Courier New', monospace;
             font-size: 16px;
         }
 
         input:focus {
             outline: none;
-            box-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+            box-shadow: 0 0 15px rgba(74, 158, 255, 0.5);
         }
 
-        .motivational-quote {
-            font-style: italic;
-            color: #ffd700;
-            margin: 20px 0;
-            font-size: 18px;
-            text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
-        }
-
-        .btn {
-            background: linear-gradient(45deg, #4a90e2, #357abd);
-            color: white;
+        button {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
             border: none;
             padding: 15px 30px;
-            font-size: 18px;
             border-radius: 25px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
-            margin: 10px;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(247, 147, 30, 0.4);
         }
 
-        .btn:hover {
+        button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+            box-shadow: 0 6px 25px rgba(247, 147, 30, 0.6);
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+        .lives {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: #74b9ff;
         }
 
-        .mission-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+        .question-container {
             margin: 30px 0;
-        }
-
-        .mission-card {
-            background: rgba(0, 0, 0, 0.6);
-            border: 2px solid #4a90e2;
-            border-radius: 15px;
             padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .mission-card:hover {
-            border-color: #ffd700;
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-        }
-
-        .mission-card h3 {
-            color: #4a90e2;
-            margin-bottom: 10px;
-        }
-
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .score {
-            background: rgba(255, 215, 0, 0.2);
-            padding: 10px 20px;
-            border-radius: 20px;
-            border: 2px solid #ffd700;
-        }
-
-        .challenge-info {
-            text-align: left;
-            margin-bottom: 30px;
-        }
-
-        .hint {
-            background: rgba(74, 144, 226, 0.2);
-            border-left: 4px solid #4a90e2;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 5px;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .answer-input {
-            margin: 20px 0;
-        }
-
-        .feedback {
-            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
             border-radius: 10px;
+            border: 1px solid #00ff41;
+        }
+
+        .question {
+            font-size: 16px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            color: #ffffff;
+        }
+
+        .drop-zones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
             margin: 15px 0;
+        }
+
+        .drop-zone {
+            min-width: 120px;
+            min-height: 40px;
+            border: 2px dashed #4a9eff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(74, 158, 255, 0.1);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .drop-zone.drag-over {
+            background: rgba(74, 158, 255, 0.3);
+            border-color: #0984e3;
+        }
+
+        .drop-zone.filled {
+            background: rgba(74, 158, 255, 0.2);
+            border-color: #4a9eff;
+            border-style: solid;
+        }
+
+        .draggable-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .draggable {
+            padding: 10px 15px;
+            background: #4a9eff;
+            color: white;
+            border-radius: 20px;
+            cursor: grab;
+            user-select: none;
+            transition: all 0.3s ease;
             font-weight: bold;
         }
 
-        .correct {
-            background: rgba(0, 255, 0, 0.2);
-            border: 2px solid #00ff00;
-            color: #00ff00;
+        .draggable:hover {
+            background: #0984e3;
+            transform: scale(1.05);
         }
 
-        .incorrect {
-            background: rgba(255, 0, 0, 0.2);
-            border: 2px solid #ff0000;
-            color: #ff0000;
+        .draggable.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .draggable.used {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: rgba(20, 30, 50, 0.95);
+            border: 2px solid #74b9ff;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
         }
 
         .certificate {
-            background: linear-gradient(135deg, #ffd700, #ffed4a);
-            color: #333;
-            border-radius: 20px;
-            padding: 40px;
-            margin: 20px 0;
-            border: 5px solid #d4af37;
+            background: linear-gradient(135deg, #2d3748, #4a5568, #2d3748);
+            color: #e2e8f0;
+            border: 3px solid #4a9eff;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(74, 158, 255, 0.4);
         }
 
-        .certificate h2 {
-            color: #8b4513;
-            margin-bottom: 20px;
+        .hidden {
+            display: none;
         }
 
         .progress-bar {
             width: 100%;
-            height: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 5px;
-            margin: 20px 0;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            margin: 15px 0;
             overflow: hidden;
         }
 
-        .progress {
+        .progress-fill {
             height: 100%;
-            background: linear-gradient(45deg, #4a90e2, #357abd);
-            transition: width 0.5s ease;
+            background: linear-gradient(90deg, #4a9eff, #74b9ff);
+            width: 0%;
+            transition: width 0.3s ease;
         }
 
-        .planet {
-            position: absolute;
-            border-radius: 50%;
-            opacity: 0.1;
-        }
-
-        .planet1 {
-            width: 100px;
-            height: 100px;
-            background: #ff6b6b;
-            top: 10%;
-            right: 10%;
-            animation: orbit 20s linear infinite;
-        }
-
-        .planet2 {
-            width: 60px;
-            height: 60px;
-            background: #4ecdc4;
-            bottom: 20%;
-            left: 5%;
-            animation: orbit 15s linear infinite reverse;
-        }
-
-        @keyframes orbit {
-            from { transform: rotate(0deg) translateX(50px) rotate(0deg); }
-            to { transform: rotate(360deg) translateX(50px) rotate(-360deg); }
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .game-header {
-                flex-direction: column;
-                gap: 10px;
-            }
+        .phase-indicator {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 18px;
+            color: #74b9ff;
         }
     </style>
 </head>
 <body>
-    <div class="stars" id="stars"></div>
-    <div class="planet planet1"></div>
-    <div class="planet planet2"></div>
-
-    <div class="container">
-        <!-- Tela Inicial -->
-        <div class="screen active" id="startScreen">
-            <div class="rocket">🚀</div>
-            <h1>Missões Espaciais</h1>
-            <p class="motivational-quote">"Cada desafio é uma fase. Cada resposta, uma chave para dominar o território. Pronto para jogar?"</p>
+    <div class="stars"></div>
+    
+    <!-- Tela Inicial -->
+    <div id="startScreen" class="container">
+        <div class="screen">
+            <h1>🚀 ARQUIVO CONFIDENCIAL 🚀</h1>
+            <p style="text-align: center; margin: 15px 0; font-size: 16px;">
+                Bem-vindo à nave espacial! Para liberar sua passagem pelos compartimentos da nave, você deve completar as frases corretamente.
+            </p>
             
             <div class="input-group">
-                <label for="playerName">Nome do Agente:</label>
-                <input type="text" id="playerName" placeholder="Digite seu nome">
+                <label for="playerName">Nome do Astronauta:</label>
+                <input type="text" id="playerName" placeholder="Digite seu nome completo">
             </div>
             
             <div class="input-group">
-                <label for="playerCPF">CPF:</label>
-                <input type="text" id="playerCPF" placeholder="Digite seu CPF">
+                <label for="playerCPF">CPF do Astronauta:</label>
+                <input type="text" id="playerCPF" placeholder="000.000.000-00" maxlength="14">
             </div>
             
-            <button class="btn" onclick="startGame()">Iniciar Missão</button>
-        </div>
-
-        <!-- Seleção de Missões -->
-        <div class="screen" id="missionSelect">
-            <h1>Selecione sua Missão</h1>
-            <div class="mission-grid">
-                <div class="mission-card" onclick="selectMission(0)">
-                    <div style="color: #ffd700; font-weight: bold; margin-bottom: 10px;">Vídeo 1</div>
-                    <h3>🌍 Missão - Mundo Over</h3>
-                    <p>3 Desafios</p>
-                    <p>Explore os conceitos fundamentais</p>
-                </div>
-                <div class="mission-card" onclick="selectMission(1)">
-                    <div style="color: #ffd700; font-weight: bold; margin-bottom: 10px;">Vídeo 2</div>
-                    <h3>🌌 Universo da Recuperação</h3>
-                    <p>5 Desafios</p>
-                    <p>Domine as fases do atraso</p>
-                </div>
-                <div class="mission-card" onclick="selectMission(2)">
-                    <div style="color: #ffd700; font-weight: bold; margin-bottom: 10px;">Vídeo 3</div>
-                    <h3>👨‍🚀 Agente do Mundo Quebra</h3>
-                    <p>4 Desafios</p>
-                    <p>Torne-se um especialista</p>
-                </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="showRules()">INICIAR MISSÃO</button>
             </div>
         </div>
+    </div>
 
-        <!-- Jogo -->
-        <div class="screen" id="gameScreen">
-            <div class="game-header">
-                <h2 id="missionTitle"></h2>
-                <div class="score">
-                    Pontos: <span id="score">0</span>
-                </div>
+    <!-- Tela de Regras -->
+    <div id="rulesScreen" class="container hidden">
+        <div class="screen">
+            <h1>📋 REGRAS DA MISSÃO</h1>
+            
+            <div style="text-align: left; font-size: 15px; line-height: 1.6; margin: 20px 0;">
+                <p><strong>🎯 OBJETIVO:</strong> Complete as frases arrastando as palavras corretas para os espaços em branco.</p>
+                <br>
+                <p><strong>❤️ VIDAS:</strong> Você possui 3 vidas. A cada erro, perderá uma vida.</p>
+                <br>
+                <p><strong>🚀 FASES:</strong> Navegue pelos compartimentos da nave respondendo corretamente.</p>
+                <br>
+                <p><strong>⏱️ TEMPO:</strong> Você tem 1 minuto para completar cada fase.</p>
+                <br>
+                <p><strong>🏆 CERTIFICADO:</strong> Complete todas as fases para receber seu certificado de astronauta!</p>
+                <br>
+                <p><strong>🔄 COMO JOGAR:</strong> Arraste as palavras da área de opções para os espaços vazios na frase.</p>
             </div>
+            
+            <div style="text-align: center; margin-top: 25px;">
+                <button onclick="startGame()">CONTINUAR MISSÃO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela do Jogo -->
+    <div id="gameScreen" class="container hidden">
+        <div class="screen">
+            <div class="lives" id="livesDisplay">❤️❤️❤️</div>
+            <div class="phase-indicator" id="phaseIndicator">COMPARTIMENTO 1/5</div>
             
             <div class="progress-bar">
-                <div class="progress" id="progress"></div>
+                <div class="progress-fill" id="progressFill"></div>
             </div>
             
-            <div class="challenge-info">
-                <h3 id="challengeTitle"></h3>
-                <div id="hintsContainer"></div>
+            <div class="question-container">
+                <div class="question" id="questionText"></div>
+                <div class="drop-zones" id="dropZones"></div>
+                <div class="draggable-options" id="draggableOptions"></div>
             </div>
             
-            <div class="answer-input">
-                <input type="text" id="answerInput" placeholder="Digite sua resposta">
-                <button class="btn" onclick="submitAnswer()">Enviar Resposta</button>
-                <button class="btn" id="hintBtn" onclick="requestHint()" style="background: linear-gradient(45deg, #ffd700, #ffed4a); color: #333;">💡 Solicitar Pista</button>
+            <div style="text-align: center; margin-top: 20px;">
+                <button id="checkAnswerBtn" onclick="checkAnswer()">VERIFICAR RESPOSTA</button>
+                <button id="nextPhaseBtn" onclick="nextPhase()" class="hidden">PRÓXIMO COMPARTIMENTO</button>
             </div>
             
-            <div id="feedback"></div>
-            
-            <button class="btn" id="nextBtn" onclick="nextChallenge()" style="display: none;">Próximo Desafio</button>
+            <div style="text-align: center; margin-top: 12px;">
+                <span id="timer" style="font-size: 22px; color: #74b9ff; font-weight: bold;">60</span>
+            </div>
         </div>
+    </div>
 
-        <!-- Resultado Final -->
-        <div class="screen" id="resultScreen">
-            <h1>Missão Concluída!</h1>
-            <div id="finalScore"></div>
-            
+    <!-- Modal de Erro -->
+    <div id="errorModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="color: #e74c3c; margin-bottom: 20px;">🚨 ACESSO NEGADO!</h2>
+            <p style="font-size: 18px; margin-bottom: 20px;">Identificação falhou. Você perdeu uma vida!</p>
+            <button onclick="closeErrorModal()">TENTAR NOVAMENTE</button>
+        </div>
+    </div>
+
+    <!-- Modal de Sucesso -->
+    <div id="successModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="color: #00d084; margin-bottom: 20px;">✅ PERFIL DESBLOQUEADO!</h2>
+            <p style="font-size: 18px; margin-bottom: 20px;">Acesso liberado! Preparando próximo compartimento...</p>
+            <button onclick="closeSuccessModal()">CONTINUAR</button>
+        </div>
+    </div>
+
+    <!-- Modal Game Over -->
+    <div id="gameOverModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="color: #e74c3c; margin-bottom: 20px;">💥 MISSÃO FALHOU!</h2>
+            <p style="font-size: 18px; margin-bottom: 20px;">Todas as vidas foram perdidas. A nave está em lockdown!</p>
+            <button onclick="restartGame()">TENTAR NOVAMENTE</button>
+        </div>
+    </div>
+
+    <!-- Tela do Certificado -->
+    <div id="certificateScreen" class="container hidden">
+        <div class="screen">
             <div class="certificate">
-                <h2>🏆 CERTIFICADO DE CONCLUSÃO 🏆</h2>
-                <p>Certificamos que</p>
-                <h3 id="certificateName"></h3>
-                <p>completou com sucesso as</p>
-                <h3>MISSÕES ESPACIAIS</h3>
-                <p>demonstrando conhecimento em recuperação financeira</p>
-                <p id="certificateDate"></p>
+                <h1 style="color: #74b9ff; margin-bottom: 15px; font-size: 24px;">🛡️ CERTIFICADO DE INTELIGÊNCIA EM SEGURANÇA ESPACIAL 🛡️</h1>
+                <p style="font-size: 18px; margin: 15px 0; color: #e2e8f0;">Certificamos que</p>
+                <h2 id="certificateName" style="color: #4a9eff; margin: 15px 0; font-size: 22px; text-shadow: 0 0 10px #4a9eff;"></h2>
+                <p style="font-size: 16px; margin: 15px 0; color: #e2e8f0; line-height: 1.5;">
+                    Completou com sucesso a missão ARQUIVO CONFIDENCIAL<br>
+                    navegando por todos os compartimentos da nave espacial<br>
+                    e desbloqueando todos os perfis confidenciais com expertise<br>
+                    em protocolos de segurança e identificação.
+                </p>
+                <p style="font-size: 14px; margin-top: 20px; color: #cbd5e0;">
+                    <strong>Data da Missão:</strong> <span id="certificateDate"></span><br>
+                    <strong>CPF do Astronauta:</strong> <span id="certificateCPF"></span>
+                </p>
             </div>
-            
-            <button class="btn" onclick="restartGame()">Nova Missão</button>
+            <div style="text-align: center; margin-top: 25px;">
+                <button onclick="restartGame()">NOVA MISSÃO</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Dados do jogo
-        const missions = [
+        let currentPhase = 0;
+        let lives = 3;
+        let timer;
+        let timeLeft = 60;
+        let playerName = '';
+        let playerCPF = '';
+
+        const phases = [
             {
-                name: "🌍 Missão - Mundo Over",
-                challenges: [
-                    {
-                        title: "Desafio 1: Qual é o conceito?",
-                        hints: [
-                            "Sou como uma sala de cirurgia no mundo da recuperação financeira.",
-                            "Negócio produtos com mais de 90 dias de atraso — mas posso agir antes disso também.",
-                            "Quando entro em ação, os limites são cancelados e o foco é total na recuperação."
-                        ],
-                        answer: "mundo over"
-                    },
-                    {
-                        title: "Desafio 2: Que tipo de migração é essa?",
-                        hints: [
-                            "Sou uma estratégia que permite agir antes dos 90 dias de atraso.",
-                            "Posso ser aplicada a cartões, contas correntes e empréstimos sem garantia.",
-                            "Trago benefícios como menores taxas, mas cancelo limites."
-                        ],
-                        answer: "antecipação"
-                    },
-                    {
-                        title: "Desafio 3: Qual é a diferença?",
-                        hints: [
-                            "Sou comparado a um check-up médico.",
-                            "Atuo até os 89 dias de atraso, mantendo o relacionamento com o cliente.",
-                            "Sou o estágio anterior ao tratamento intensivo."
-                        ],
-                        answer: "origem"
-                    }
-                ]
+                question: "Cliente: Olá, eu sou o Carlos Fernando Lima<br>Boa tarde, Fernando, seu CPF: 123.456.789-10<br>Tipo de atendimento: ______",
+                blanks: ["Receptivo"],
+                options: ["Ativo", "Receptivo"],
+                correctAnswers: ["Receptivo"]
             },
             {
-                name: "🌌 Universo da Recuperação",
-                challenges: [
-                    {
-                        title: "Desafio 1: Qual é a fase do atraso?",
-                        hints: [
-                            "O cliente atrasou, mas o acordo ainda está ativo.",
-                            "Minha missão é cobrar a parcela e manter o acordo vivo.",
-                            "Atuo entre 01 e 41 dias de atraso."
-                        ],
-                        answer: "pré-quebra"
-                    },
-                    {
-                        title: "Desafio 2: Qual é a fase do atraso?",
-                        hints: [
-                            "O atraso já impactou o banco, mas ainda dá para salvar o acordo.",
-                            "Minha missão é evitar que o cliente perca os benefícios.",
-                            "Atuo entre 42 e 89 dias de atraso."
-                        ],
-                        answer: "quebra automática"
-                    },
-                    {
-                        title: "Desafio 3: Qual é a fase do atraso?",
-                        hints: [
-                            "O sistema já encerrou o acordo por falta de pagamento.",
-                            "Minha missão é criar um novo acordo com base na situação atual do cliente.",
-                            "Atuo em casos com 90+ dias de atraso."
-                        ],
-                        answer: "quebra sistêmica"
-                    },
-                    {
-                        title: "Desafio 4: Qual é a fase do atraso?",
-                        hints: [
-                            "O cliente não consegue mais pagar o acordo atual.",
-                            "Minha missão é interromper o acordo e criar um novo no mesmo dia.",
-                            "Não tenho prazo definido."
-                        ],
-                        answer: "interrupção manual"
-                    },
-                    {
-                        title: "Desafio 5: Qual é o conceito?",
-                        hints: [
-                            "Sou como um código secreto no universo da recuperação.",
-                            "Registro o compromisso do cliente de pagar a parcela em atraso dentro do prazo permitido.",
-                            "Meu prazo é chamado de D+1 dia útil."
-                        ],
-                        answer: "promessa de pagamento"
-                    }
-                ]
+                question: "Boa tarde, eu falo com Carlos Fernando Lima?<br>Cliente: Sim<br>Farei uma breve confirmação dos seus dados para seguirmos com o atendimento seu ______ quais os dois últimos?<br>Cliente: 33<br>Sua data de nascimento é ______, qual o ano?<br>Tipo de atendimento: ______",
+                blanks: ["CPF: 237689437-", "23/09", "Ativo"],
+                options: ["23/09", "23/09/1988", "1998", "CPF: 237689437-", "Filiação ou RG", "33", "Ativo", "Receptivo"],
+                correctAnswers: ["CPF: 237689437-", "23/09", "Ativo"]
             },
             {
-                name: "👨‍🚀 Agente do Mundo Quebra",
-                challenges: [
-                    {
-                        title: "Desafio 1 – O Início da Investigação",
-                        hints: [
-                            "Você age como um detetive de negociações.",
-                            "Verifica se há recadastro, fila de atuação ou comunicado de oferta.",
-                            "Se a conta estiver cancelada ou bloqueada, a proposta muda de formato."
-                        ],
-                        answer: "verificação inicial"
-                    },
-                    {
-                        title: "Desafio 2 – O Raio-X do Acordo",
-                        hints: [
-                            "Você analisa o canal de contratação e a forma de pagamento.",
-                            "Avalia quantas parcelas foram pagas e o valor negociado.",
-                            "Usa essas informações para adaptar a abordagem ao cliente."
-                        ],
-                        answer: "consulta do acordo vigente"
-                    },
-                    {
-                        title: "Desafio 3 – O Retorno ao Mundo Over",
-                        hints: [
-                            "O cliente está na base de recadastro.",
-                            "O acordo anterior é cancelado e um novo é criado.",
-                            "As novas condições não podem ser mais vantajosas que as anteriores."
-                        ],
-                        answer: "recadastro de acordo"
-                    },
-                    {
-                        title: "Desafio 4 – O Código da Alçada",
-                        hints: [
-                            "A entrada é obrigatória, exceto em campanhas.",
-                            "O cliente tem até D+9 dias corridos para pagar a entrada.",
-                            "Entre a entrada e a 1ª parcela, deve haver pelo menos 16 dias corridos."
-                        ],
-                        answer: "alçada de pagamento para recadastro"
-                    }
-                ]
+                question: "Boa tarde, eu falo com Carlos Fernando Lima?<br>Cliente: Sim<br>Farei uma breve confirmação dos seus dados para seguirmos com o atendimento seu ______ quais os dois últimos?<br>Cliente: 33<br>Sua ______, qual o ano?<br>Cliente: Já passei o CPF, você ainda quer nascimento, não vou passar.<br>Neste caso podemos trocar para ______<br>Cliente: Maria Letícia Lima.<br>Tipo de contato: ______",
+                blanks: ["CPF 237689437", "data de nascimento 23/09", "Filiação", "Ativo"],
+                options: ["data de nascimento 23/09", "1998", "CPF 237689437", "33", "Filiação", "RG", "Ativo", "Receptivo"],
+                correctAnswers: ["CPF 237689437", "data de nascimento 23/09", "Filiação", "Ativo"]
+            },
+            {
+                question: "Farei uma breve confirmação dos seus dados para seguirmos com o atendimento seu ______ quais os dois últimos?<br>Cliente: 33<br>Sua data de nascimento é 23/09, qual o ano?<br>Cliente: Já passei o CPF, você ainda quer nascimento, não vou passar.<br>Neste caso podemos trocar para filiação. Qual o nome da sua mãe ou do seu pai?<br>Cliente: Prefiro não falar nada dos meus pais<br>Atendente: Tudo bem então, neste caso você pode me informar o ______<br>Tipo de contato: ______",
+                blanks: ["CPF 237689437", "RG", "Ativo"],
+                options: ["23/09/1998", "data de nascimento 23/09", "CPF 237689437", "33", "Filiação", "RG", "Ativo", "Receptivo"],
+                correctAnswers: ["CPF 237689437", "RG", "Ativo"]
             }
         ];
 
-        // Variáveis do jogo
-        let playerName = '';
-        let playerCPF = '';
-        let currentMission = 0;
-        let currentChallenge = 0;
-        let currentHints = 0;
-        let totalScore = 0;
-        let challengesCompleted = 0;
-
-        // Inicializar estrelas
-        function createStars() {
-            const starsContainer = document.getElementById('stars');
-            for (let i = 0; i < 100; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.width = star.style.height = Math.random() * 3 + 1 + 'px';
-                star.style.animationDelay = Math.random() * 3 + 's';
-                starsContainer.appendChild(star);
-            }
+        function formatCPF(input) {
+            let value = input.value.replace(/\D/g, '');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            input.value = value;
         }
 
-        // Iniciar jogo
-        function startGame() {
+        document.getElementById('playerCPF').addEventListener('input', function() {
+            formatCPF(this);
+        });
+
+        function showRules() {
             playerName = document.getElementById('playerName').value.trim();
             playerCPF = document.getElementById('playerCPF').value.trim();
             
@@ -561,189 +476,226 @@
                 return;
             }
             
-            showScreen('missionSelect');
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('rulesScreen').classList.remove('hidden');
         }
 
-        // Selecionar missão
-        function selectMission(missionIndex) {
-            currentMission = missionIndex;
-            currentChallenge = 0;
-            currentHints = 0;
-            challengesCompleted = 0;
+        function startGame() {
+            document.getElementById('rulesScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            loadPhase();
+            startTimer();
+        }
+
+        function loadPhase() {
+            const phase = phases[currentPhase];
+            document.getElementById('questionText').innerHTML = phase.question;
+            document.getElementById('phaseIndicator').textContent = `COMPARTIMENTO ${currentPhase + 1}/4`;
             
-            document.getElementById('missionTitle').textContent = missions[currentMission].name;
-            loadChallenge();
-            showScreen('gameScreen');
-        }
-
-        // Carregar desafio
-        function loadChallenge() {
-            const challenge = missions[currentMission].challenges[currentChallenge];
-            const totalChallenges = missions[currentMission].challenges.length;
+            // Update progress bar
+            const progress = ((currentPhase) / phases.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
             
-            document.getElementById('challengeTitle').textContent = challenge.title;
-            document.getElementById('hintsContainer').innerHTML = '';
-            document.getElementById('answerInput').value = '';
-            document.getElementById('feedback').innerHTML = '';
-            document.getElementById('nextBtn').style.display = 'none';
+            // Create drop zones
+            const dropZones = document.getElementById('dropZones');
+            dropZones.innerHTML = '';
             
-            currentHints = 0;
-            showNextHint();
-            updateHintButton();
+            phase.blanks.forEach((blank, index) => {
+                const dropZone = document.createElement('div');
+                dropZone.className = 'drop-zone';
+                dropZone.dataset.index = index;
+                dropZone.textContent = '______';
+                dropZone.addEventListener('dragover', handleDragOver);
+                dropZone.addEventListener('drop', handleDrop);
+                dropZones.appendChild(dropZone);
+            });
             
-            // Atualizar barra de progresso
-            const progress = ((challengesCompleted) / totalChallenges) * 100;
-            document.getElementById('progress').style.width = progress + '%';
-        }
-
-        // Mostrar próxima dica
-        function showNextHint() {
-            if (currentHints < 3) {
-                const challenge = missions[currentMission].challenges[currentChallenge];
-                const hintsContainer = document.getElementById('hintsContainer');
-                
-                const hintElement = document.createElement('div');
-                hintElement.className = 'hint';
-                hintElement.innerHTML = `<strong>Pista ${currentHints + 1}:</strong> ${challenge.hints[currentHints]}`;
-                hintsContainer.appendChild(hintElement);
-                
-                currentHints++;
-                updateHintButton();
-            }
-        }
-
-        // Atualizar botão de pistas
-        function updateHintButton() {
-            const hintBtn = document.getElementById('hintBtn');
-            if (currentHints >= 3) {
-                hintBtn.style.display = 'none';
-            } else {
-                hintBtn.style.display = 'inline-block';
-                hintBtn.textContent = `💡 Solicitar Pista (${3 - currentHints} restantes)`;
-            }
-        }
-
-        // Solicitar pista manual
-        function requestHint() {
-            if (currentHints < 3) {
-                showNextHint();
-            }
-        }
-
-        // Enviar resposta
-        function submitAnswer() {
-            const userAnswer = document.getElementById('answerInput').value.trim().toLowerCase();
-            const correctAnswer = missions[currentMission].challenges[currentChallenge].answer.toLowerCase();
-            const feedbackElement = document.getElementById('feedback');
+            // Create draggable options
+            const optionsContainer = document.getElementById('draggableOptions');
+            optionsContainer.innerHTML = '';
             
-            if (!userAnswer) {
-                alert('Por favor, digite uma resposta!');
+            phase.options.forEach((option, index) => {
+                const draggable = document.createElement('div');
+                draggable.className = 'draggable';
+                draggable.draggable = true;
+                draggable.textContent = option;
+                draggable.dataset.option = option;
+                draggable.addEventListener('dragstart', handleDragStart);
+                optionsContainer.appendChild(draggable);
+            });
+            
+            // Reset buttons
+            document.getElementById('checkAnswerBtn').classList.remove('hidden');
+            document.getElementById('nextPhaseBtn').classList.add('hidden');
+            
+            // Reset timer
+            timeLeft = 60;
+            document.getElementById('timer').textContent = timeLeft;
+        }
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.option);
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.target.classList.add('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.target.classList.remove('drag-over');
+            
+            if (e.target.classList.contains('filled')) {
                 return;
             }
             
-            // Verificar se a resposta contém palavras-chave da resposta correta
-            const correctWords = correctAnswer.split(' ');
-            const userWords = userAnswer.split(' ');
-            const matches = correctWords.filter(word => 
-                userWords.some(userWord => 
-                    userWord.includes(word) || word.includes(userWord)
-                )
-            );
+            const option = e.dataTransfer.getData('text/plain');
+            e.target.textContent = option;
+            e.target.classList.add('filled');
+            e.target.dataset.answer = option;
             
-            const isCorrect = matches.length >= Math.ceil(correctWords.length * 0.7); // 70% das palavras devem corresponder
+            // Mark draggable as used
+            const draggables = document.querySelectorAll('.draggable');
+            draggables.forEach(d => {
+                if (d.dataset.option === option) {
+                    d.classList.add('used');
+                    d.draggable = false;
+                }
+                d.classList.remove('dragging');
+            });
+        }
+
+        function checkAnswer() {
+            const phase = phases[currentPhase];
+            const dropZones = document.querySelectorAll('.drop-zone');
+            let correct = true;
             
-            if (isCorrect) {
-                // Resposta correta
-                let points = 0;
-                if (currentHints === 1) points = 10;
-                else if (currentHints === 2) points = 5;
-                else if (currentHints === 3) points = 3;
-                
-                totalScore += points;
-                challengesCompleted++;
-                
-                feedbackElement.innerHTML = `
-                    <div class="feedback correct">
-                        🎉 Correto! Você ganhou ${points} pontos!
-                        <br>Resposta: ${missions[currentMission].challenges[currentChallenge].answer}
-                    </div>
-                `;
-                
-                document.getElementById('score').textContent = totalScore;
-                document.getElementById('nextBtn').style.display = 'inline-block';
-                document.getElementById('hintBtn').style.display = 'none';
-                
+            dropZones.forEach((zone, index) => {
+                const answer = zone.dataset.answer;
+                if (answer !== phase.correctAnswers[index]) {
+                    correct = false;
+                }
+            });
+            
+            clearInterval(timer);
+            
+            if (correct) {
+                document.getElementById('successModal').classList.remove('hidden');
             } else {
-                // Resposta incorreta
-                feedbackElement.innerHTML = `
-                    <div class="feedback incorrect">
-                        ❌ Resposta incorreta. ${currentHints < 3 ? 'Você pode solicitar mais pistas ou tentar novamente!' : 'A resposta correta era: ' + missions[currentMission].challenges[currentChallenge].answer}
-                    </div>
-                `;
-                
-                if (currentHints >= 3) {
-                    challengesCompleted++;
-                    document.getElementById('nextBtn').style.display = 'inline-block';
-                    document.getElementById('hintBtn').style.display = 'none';
+                lives--;
+                updateLives();
+                if (lives === 0) {
+                    document.getElementById('gameOverModal').classList.remove('hidden');
+                } else {
+                    document.getElementById('errorModal').classList.remove('hidden');
                 }
             }
         }
 
-        // Próximo desafio
-        function nextChallenge() {
-            currentChallenge++;
-            
-            if (currentChallenge < missions[currentMission].challenges.length) {
-                loadChallenge();
+        function closeErrorModal() {
+            document.getElementById('errorModal').classList.add('hidden');
+            resetPhase();
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('checkAnswerBtn').classList.add('hidden');
+            document.getElementById('nextPhaseBtn').classList.remove('hidden');
+        }
+
+        function nextPhase() {
+            currentPhase++;
+            if (currentPhase >= phases.length) {
+                showCertificate();
             } else {
-                showResults();
+                loadPhase();
+                startTimer();
             }
         }
 
-        // Mostrar resultados
-        function showResults() {
-            const totalChallenges = missions[currentMission].challenges.length;
-            const maxScore = totalChallenges * 10;
-            const percentage = Math.round((totalScore / maxScore) * 100);
+        function resetPhase() {
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                zone.textContent = '______';
+                zone.classList.remove('filled');
+                zone.removeAttribute('data-answer');
+            });
             
-            document.getElementById('finalScore').innerHTML = `
-                <h2>Sua Pontuação: ${totalScore} pontos</h2>
-                <p>Desempenho: ${percentage}%</p>
-            `;
+            const draggables = document.querySelectorAll('.draggable');
+            draggables.forEach(d => {
+                d.classList.remove('used');
+                d.draggable = true;
+            });
+            
+            timeLeft = 60;
+            document.getElementById('timer').textContent = timeLeft;
+            startTimer();
+        }
+
+        function updateLives() {
+            const hearts = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
+            document.getElementById('livesDisplay').textContent = hearts;
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                const timerElement = document.getElementById('timer');
+                timerElement.textContent = timeLeft;
+                
+                // Mudar cor para vermelho nos últimos 10 segundos
+                if (timeLeft <= 10) {
+                    timerElement.style.color = '#e74c3c';
+                    timerElement.style.textShadow = '0 0 10px #e74c3c';
+                } else {
+                    timerElement.style.color = '#74b9ff';
+                    timerElement.style.textShadow = 'none';
+                }
+                
+                if (timeLeft === 0) {
+                    clearInterval(timer);
+                    lives--;
+                    updateLives();
+                    if (lives === 0) {
+                        document.getElementById('gameOverModal').classList.remove('hidden');
+                    } else {
+                        document.getElementById('errorModal').classList.remove('hidden');
+                    }
+                }
+            }, 1000);
+        }
+
+        function restartGame() {
+            currentPhase = 0;
+            lives = 3;
+            updateLives();
+            
+            // Hide all modals and screens
+            document.querySelectorAll('.modal').forEach(modal => modal.classList.add('hidden'));
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('certificateScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+            
+            // Clear inputs
+            document.getElementById('playerName').value = '';
+            document.getElementById('playerCPF').value = '';
+            
+            clearInterval(timer);
+        }
+
+        function showCertificate() {
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('certificateScreen').classList.remove('hidden');
             
             document.getElementById('certificateName').textContent = playerName;
+            document.getElementById('certificateCPF').textContent = playerCPF;
             document.getElementById('certificateDate').textContent = new Date().toLocaleDateString('pt-BR');
-            
-            showScreen('resultScreen');
         }
 
-        // Reiniciar jogo
-        function restartGame() {
-            totalScore = 0;
-            currentChallenge = 0;
-            currentHints = 0;
-            challengesCompleted = 0;
-            document.getElementById('score').textContent = '0';
-            showScreen('missionSelect');
-        }
-
-        // Mostrar tela
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(screen => {
-                screen.classList.remove('active');
-            });
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        // Event listener para Enter
-        document.getElementById('answerInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                submitAnswer();
-            }
-        });
-
-        // Inicializar
-        createStars();
+        // Initialize lives display
+        updateLives();
     </script>
 </body>
 </html>
