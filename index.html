@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arquivo Confidencial - Missão Espacial</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -291,6 +292,7 @@
     </style>
 </head>
 <body>
+   
     <div class="stars"></div>
     
     <!-- Tela Inicial -->
@@ -415,18 +417,86 @@
                 </p>
             </div>
             <div style="text-align: center; margin-top: 25px;">
+                <button onclick="downloadCertificate()" style="margin-right: 15px; background: linear-gradient(45deg, #00d084, #00b894);">📄 BAIXAR CERTIFICADO</button>
                 <button onclick="restartGame()">NOVA MISSÃO</button>
             </div>
         </div>
     </div>
 
     <script>
+         
+        const SUPABASE_URL = 'https://tzpabhwwkzsaaftpyuqd.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cGFiaHd3a3pzYWFmdHB5dXFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2Njk2NjMsImV4cCI6MjA3MDI0NTY2M30.2W8ax4GAPTknZE-Uxc3lgKissPO5pATp4PS09NGQamg';
+        
+        // Inicialização do cliente Supabase
+        let supabase;
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (error) {
+            console.log('Supabase não configurado - funcionando em modo offline');
+        }
+
+// ===== FUNÇÕES DO SUPABASE =====
+        async function saveGameData() {
+            if (!supabase) {
+                console.log('Supabase não configurado - dados não salvos');
+                return;
+            }
+
+            try {
+                const gameRecord = {
+                    nome: playerName,
+                    cpf: playerCPF,
+                    quantidade_tentativas: totalAttempts,
+                    pontuacao: score,
+                    data_realizacao: gameData.startTime,
+                    data_conclusao: gameData.endTime,
+                    detalhes_tentativas: JSON.stringify(gameData.attempts),
+                    vidas_restantes: lives,
+                    tempo_total_segundos: Math.floor((new Date(gameData.endTime) - new Date(gameData.startTime)) / 1000)
+                };
+
+                const { data, error } = await supabase
+                    .from('Arquivo Confidencial')
+                    .insert([gameRecord]);
+
+                if (error) {
+                    console.error('Erro ao salvar no Supabase:', error);
+                } else {
+                    console.log('Dados salvos com sucesso!', data);
+                }
+            } catch (error) {
+                console.error('Erro na conexão com Supabase:', error);
+            }
+        }
+
+        function calculateScore() {
+            // Sistema de pontuação:
+            // 100 pontos por fase completada
+            // 50 pontos extras por vida restante
+            // Bônus de tempo (quanto mais rápido, melhor)
+            const baseScore = (currentPhase + 1) * 100;
+            const livesBonus = lives * 50;
+            const timeBonus = Math.max(0, (300 - totalAttempts * 60) / 10); // Bônus baseado na velocidade
+            
+            return Math.round(baseScore + livesBonus + timeBonus);
+        }
+
+        // ===== VARIÁVEIS DO JOGO =====
         let currentPhase = 0;
         let lives = 3;
         let timer;
         let timeLeft = 60;
         let playerName = '';
         let playerCPF = '';
+        let gameStartTime = null;
+        let totalAttempts = 0;
+        let score = 0;
+        let gameData = {
+            attempts: [],
+            startTime: null,
+            endTime: null
+        };
 
         const phases = [
             {
@@ -483,6 +553,12 @@
         function startGame() {
             document.getElementById('rulesScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.remove('hidden');
+            
+            // Inicializar dados do jogo
+            gameData.startTime = new Date().toISOString();
+            gameData.attempts = [];
+            totalAttempts = 0;
+            
             loadPhase();
             startTimer();
         }
@@ -572,12 +648,31 @@
             const dropZones = document.querySelectorAll('.drop-zone');
             let correct = true;
             
+            // Registrar tentativa
+            totalAttempts++;
+            const attemptData = {
+                phase: currentPhase + 1,
+                timestamp: new Date().toISOString(),
+                timeLeft: timeLeft,
+                answers: [],
+                correct: false
+            };
+            
             dropZones.forEach((zone, index) => {
-                const answer = zone.dataset.answer;
+                const answer = zone.dataset.answer || '';
+                attemptData.answers.push({
+                    expected: phase.correctAnswers[index],
+                    given: answer,
+                    correct: answer === phase.correctAnswers[index]
+                });
+                
                 if (answer !== phase.correctAnswers[index]) {
                     correct = false;
                 }
             });
+            
+            attemptData.correct = correct;
+            gameData.attempts.push(attemptData);
             
             clearInterval(timer);
             
@@ -587,6 +682,9 @@
                 lives--;
                 updateLives();
                 if (lives === 0) {
+                    gameData.endTime = new Date().toISOString();
+                    score = calculateScore();
+                    saveGameData(); // Salvar dados mesmo em caso de falha
                     document.getElementById('gameOverModal').classList.remove('hidden');
                 } else {
                     document.getElementById('errorModal').classList.remove('hidden');
@@ -608,6 +706,10 @@
         function nextPhase() {
             currentPhase++;
             if (currentPhase >= phases.length) {
+                // Jogo concluído com sucesso
+                gameData.endTime = new Date().toISOString();
+                score = calculateScore();
+                saveGameData();
                 showCertificate();
             } else {
                 loadPhase();
@@ -670,6 +772,13 @@
         function restartGame() {
             currentPhase = 0;
             lives = 3;
+            totalAttempts = 0;
+            score = 0;
+            gameData = {
+                attempts: [],
+                startTime: null,
+                endTime: null
+            };
             updateLives();
             
             // Hide all modals and screens
@@ -692,6 +801,82 @@
             document.getElementById('certificateName').textContent = playerName;
             document.getElementById('certificateCPF').textContent = playerCPF;
             document.getElementById('certificateDate').textContent = new Date().toLocaleDateString('pt-BR');
+        }
+
+        // ===== FUNÇÃO PARA DOWNLOAD DO CERTIFICADO =====
+        function downloadCertificate() {
+            // Criar um canvas para gerar o certificado como imagem
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Configurar dimensões do canvas
+            canvas.width = 1200;
+            canvas.height = 800;
+            
+            // Fundo do certificado
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#2d3748');
+            gradient.addColorStop(0.5, '#4a5568');
+            gradient.addColorStop(1, '#2d3748');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Borda
+            ctx.strokeStyle = '#4a9eff';
+            ctx.lineWidth = 8;
+            ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+            
+            // Título
+            ctx.fillStyle = '#74b9ff';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🛡️ CERTIFICADO DE INTELIGÊNCIA 🛡️', canvas.width / 2, 120);
+            ctx.fillText('EM SEGURANÇA ESPACIAL', canvas.width / 2, 180);
+            
+            // Texto "Certificamos que"
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '32px Arial';
+            ctx.fillText('Certificamos que', canvas.width / 2, 260);
+            
+            // Nome do usuário
+            ctx.fillStyle = '#4a9eff';
+            ctx.font = 'bold 42px Arial';
+            ctx.fillText(playerName, canvas.width / 2, 320);
+            
+            // Texto principal
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '24px Arial';
+            ctx.textAlign = 'center';
+            const mainText = [
+                'Completou com sucesso a missão ARQUIVO CONFIDENCIAL',
+                'navegando por todos os compartimentos da nave espacial',
+                'e desbloqueando todos os perfis confidenciais com expertise',
+                'em protocolos de segurança e identificação.'
+            ];
+            
+            mainText.forEach((line, index) => {
+                ctx.fillText(line, canvas.width / 2, 380 + (index * 35));
+            });
+            
+            // Informações adicionais
+            ctx.font = '20px Arial';
+            ctx.fillStyle = '#cbd5e0';
+            ctx.fillText(`Data da Missão: ${new Date().toLocaleDateString('pt-BR')}`, canvas.width / 2, 580);
+            ctx.fillText(`CPF do Astronauta: ${playerCPF}`, canvas.width / 2, 610);
+            ctx.fillText(`Pontuação Final: ${score} pontos`, canvas.width / 2, 640);
+            ctx.fillText(`Tentativas: ${totalAttempts} | Vidas Restantes: ${lives}`, canvas.width / 2, 670);
+            
+            // Converter canvas para blob e fazer download
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Certificado_${playerName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 'image/png');
         }
 
         // Initialize lives display
