@@ -135,11 +135,16 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(247, 147, 30, 0.4);
+            margin: 5px;
         }
 
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 25px rgba(247, 147, 30, 0.6);
+        }
+
+        .download-btn {
+            background: linear-gradient(45deg, #00d084, #00b894) !important;
         }
 
         .lives {
@@ -183,6 +188,8 @@
             background: rgba(74, 158, 255, 0.1);
             position: relative;
             transition: all 0.3s ease;
+            padding: 5px;
+            text-align: center;
         }
 
         .drop-zone.drag-over {
@@ -289,11 +296,32 @@
             font-size: 18px;
             color: #74b9ff;
         }
+
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1001;
+        }
+
+        .connected {
+            background: #00d084;
+            color: white;
+        }
+
+        .disconnected {
+            background: #e74c3c;
+            color: white;
+        }
     </style>
 </head>
 <body>
-   
     <div class="stars"></div>
+    <div id="connectionStatus" class="connection-status disconnected">⚠️ Offline</div>
     
     <!-- Tela Inicial -->
     <div id="startScreen" class="container">
@@ -348,7 +376,7 @@
     <div id="gameScreen" class="container hidden">
         <div class="screen">
             <div class="lives" id="livesDisplay">❤️❤️❤️</div>
-            <div class="phase-indicator" id="phaseIndicator">COMPARTIMENTO 1/5</div>
+            <div class="phase-indicator" id="phaseIndicator">COMPARTIMENTO 1/4</div>
             
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
@@ -413,73 +441,54 @@
                 </p>
                 <p style="font-size: 14px; margin-top: 20px; color: #cbd5e0;">
                     <strong>Data da Missão:</strong> <span id="certificateDate"></span><br>
-                    <strong>CPF do Astronauta:</strong> <span id="certificateCPF"></span>
+                    <strong>CPF do Astronauta:</strong> <span id="certificateCPF"></span><br>
+                    <strong>Pontuação Final:</strong> <span id="certificateScore"></span> pontos<br>
+                    <strong>Tentativas:</strong> <span id="certificateAttempts"></span>
                 </p>
             </div>
             <div style="text-align: center; margin-top: 25px;">
-                <button onclick="downloadCertificate()" style="margin-right: 15px; background: linear-gradient(45deg, #00d084, #00b894);">📄 BAIXAR CERTIFICADO</button>
+                <button onclick="downloadCertificate()" class="download-btn">📄 BAIXAR CERTIFICADO</button>
                 <button onclick="restartGame()">NOVA MISSÃO</button>
             </div>
         </div>
     </div>
 
     <script>
-         
+        // ===== CONFIGURAÇÃO DO SUPABASE =====
+        // SUBSTITUA ESTAS VARIÁVEIS PELAS SUAS CREDENCIAIS DO SUPABASE
         const SUPABASE_URL = 'https://tzpabhwwkzsaaftpyuqd.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6cGFiaHd3a3pzYWFmdHB5dXFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2Njk2NjMsImV4cCI6MjA3MDI0NTY2M30.2W8ax4GAPTknZE-Uxc3lgKissPO5pATp4PS09NGQamg';
         
         // Inicialização do cliente Supabase
-        let supabase;
-        try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (error) {
-            console.log('Supabase não configurado - funcionando em modo offline');
-        }
+        let supabase = null;
+        let isSupabaseConnected = false;
 
-// ===== FUNÇÕES DO SUPABASE =====
-        async function saveGameData() {
-            if (!supabase) {
-                console.log('Supabase não configurado - dados não salvos');
-                return;
-            }
-
+        function initializeSupabase() {
             try {
-                const gameRecord = {
-                    nome: playerName,
-                    cpf: playerCPF,
-                    quantidade_tentativas: totalAttempts,
-                    pontuacao: score,
-                    data_realizacao: gameData.startTime,
-                    data_conclusao: gameData.endTime,
-                    detalhes_tentativas: JSON.stringify(gameData.attempts),
-                    vidas_restantes: lives,
-                    tempo_total_segundos: Math.floor((new Date(gameData.endTime) - new Date(gameData.startTime)) / 1000)
-                };
-
-                const { data, error } = await supabase
-                    .from('Arquivo Confidencial')
-                    .insert([gameRecord]);
-
-                if (error) {
-                    console.error('Erro ao salvar no Supabase:', error);
+                if (SUPABASE_URL !== 'SUA_URL_DO_SUPABASE_AQUI' && SUPABASE_ANON_KEY !== 'SUA_CHAVE_ANONIMA_DO_SUPABASE_AQUI') {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    isSupabaseConnected = true;
+                    updateConnectionStatus(true);
+                    console.log('Supabase conectado com sucesso!');
                 } else {
-                    console.log('Dados salvos com sucesso!', data);
+                    updateConnectionStatus(false);
+                    console.log('Supabase não configurado - funcionando em modo offline');
                 }
             } catch (error) {
-                console.error('Erro na conexão com Supabase:', error);
+                console.error('Erro ao conectar com Supabase:', error);
+                updateConnectionStatus(false);
             }
         }
 
-        function calculateScore() {
-            // Sistema de pontuação:
-            // 100 pontos por fase completada
-            // 50 pontos extras por vida restante
-            // Bônus de tempo (quanto mais rápido, melhor)
-            const baseScore = (currentPhase + 1) * 100;
-            const livesBonus = lives * 50;
-            const timeBonus = Math.max(0, (300 - totalAttempts * 60) / 10); // Bônus baseado na velocidade
-            
-            return Math.round(baseScore + livesBonus + timeBonus);
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connectionStatus');
+            if (connected) {
+                statusElement.textContent = '✅ Online';
+                statusElement.className = 'connection-status connected';
+            } else {
+                statusElement.textContent = '⚠️ Offline';
+                statusElement.className = 'connection-status disconnected';
+            }
         }
 
         // ===== VARIÁVEIS DO JOGO =====
@@ -525,6 +534,55 @@
             }
         ];
 
+        // ===== FUNÇÕES DO SUPABASE =====
+        async function saveGameData() {
+            if (!isSupabaseConnected || !supabase) {
+                console.log('Supabase não configurado - dados não salvos');
+                return;
+            }
+
+            try {
+                const gameRecord = {
+                    nome: playerName,
+                    cpf: playerCPF,
+                    quantidade_tentativas: totalAttempts,
+                    pontuacao: score,
+                    data_realizacao: gameData.startTime,
+                    data_conclusao: gameData.endTime,
+                    detalhes_tentativas: gameData.attempts,
+                    vidas_restantes: lives,
+                    tempo_total_segundos: gameData.endTime ? 
+                        Math.floor((new Date(gameData.endTime) - new Date(gameData.startTime)) / 1000) : null
+                };
+
+                const { data, error } = await supabase
+                    .from('arquivo_confidencial')
+                    .insert([gameRecord]);
+
+                if (error) {
+                    console.error('Erro ao salvar no Supabase:', error);
+                    throw error;
+                } else {
+                    console.log('Dados salvos com sucesso!', data);
+                }
+            } catch (error) {
+                console.error('Erro na conexão com Supabase:', error);
+            }
+        }
+
+        function calculateScore() {
+            // Sistema de pontuação:
+            // 100 pontos por fase completada
+            // 50 pontos extras por vida restante
+            // Penalidade por tentativas extras
+            const baseScore = (currentPhase + 1) * 100;
+            const livesBonus = lives * 50;
+            const attemptPenalty = Math.max(0, (totalAttempts - phases.length) * 10);
+            
+            return Math.max(0, baseScore + livesBonus - attemptPenalty);
+        }
+
+        // ===== FUNÇÕES UTILITÁRIAS =====
         function formatCPF(input) {
             let value = input.value.replace(/\D/g, '');
             value = value.replace(/(\d{3})(\d)/, '$1.$2');
@@ -533,10 +591,7 @@
             input.value = value;
         }
 
-        document.getElementById('playerCPF').addEventListener('input', function() {
-            formatCPF(this);
-        });
-
+        // ===== FUNÇÕES DO JOGO =====
         function showRules() {
             playerName = document.getElementById('playerName').value.trim();
             playerCPF = document.getElementById('playerCPF').value.trim();
@@ -558,6 +613,9 @@
             gameData.startTime = new Date().toISOString();
             gameData.attempts = [];
             totalAttempts = 0;
+            currentPhase = 0;
+            lives = 3;
+            score = 0;
             
             loadPhase();
             startTimer();
@@ -566,10 +624,10 @@
         function loadPhase() {
             const phase = phases[currentPhase];
             document.getElementById('questionText').innerHTML = phase.question;
-            document.getElementById('phaseIndicator').textContent = `COMPARTIMENTO ${currentPhase + 1}/4`;
+            document.getElementById('phaseIndicator').textContent = `COMPARTIMENTO ${currentPhase + 1}/${phases.length}`;
             
             // Update progress bar
-            const progress = ((currentPhase) / phases.length) * 100;
+            const progress = (currentPhase / phases.length) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
             
             // Create drop zones
@@ -624,7 +682,15 @@
             e.target.classList.remove('drag-over');
             
             if (e.target.classList.contains('filled')) {
-                return;
+                // Remove previous answer and make draggable available again
+                const previousAnswer = e.target.dataset.answer;
+                const draggables = document.querySelectorAll('.draggable');
+                draggables.forEach(d => {
+                    if (d.dataset.option === previousAnswer) {
+                        d.classList.remove('used');
+                        d.draggable = true;
+                    }
+                });
             }
             
             const option = e.dataTransfer.getData('text/plain');
@@ -647,6 +713,19 @@
             const phase = phases[currentPhase];
             const dropZones = document.querySelectorAll('.drop-zone');
             let correct = true;
+            
+            // Verificar se todas as zonas estão preenchidas
+            let allFilled = true;
+            dropZones.forEach(zone => {
+                if (!zone.dataset.answer) {
+                    allFilled = false;
+                }
+            });
+            
+            if (!allFilled) {
+                alert('Por favor, preencha todos os espaços antes de verificar!');
+                return;
+            }
             
             // Registrar tentativa
             totalAttempts++;
@@ -684,7 +763,7 @@
                 if (lives === 0) {
                     gameData.endTime = new Date().toISOString();
                     score = calculateScore();
-                    saveGameData(); // Salvar dados mesmo em caso de falha
+                    saveGameData();
                     document.getElementById('gameOverModal').classList.remove('hidden');
                 } else {
                     document.getElementById('errorModal').classList.remove('hidden');
@@ -760,7 +839,23 @@
                     clearInterval(timer);
                     lives--;
                     updateLives();
+                    
+                    // Registrar tentativa de timeout
+                    totalAttempts++;
+                    const attemptData = {
+                        phase: currentPhase + 1,
+                        timestamp: new Date().toISOString(),
+                        timeLeft: 0,
+                        answers: [],
+                        correct: false,
+                        timeout: true
+                    };
+                    gameData.attempts.push(attemptData);
+                    
                     if (lives === 0) {
+                        gameData.endTime = new Date().toISOString();
+                        score = calculateScore();
+                        saveGameData();
                         document.getElementById('gameOverModal').classList.remove('hidden');
                     } else {
                         document.getElementById('errorModal').classList.remove('hidden');
@@ -801,6 +896,8 @@
             document.getElementById('certificateName').textContent = playerName;
             document.getElementById('certificateCPF').textContent = playerCPF;
             document.getElementById('certificateDate').textContent = new Date().toLocaleDateString('pt-BR');
+            document.getElementById('certificateScore').textContent = score;
+            document.getElementById('certificateAttempts').textContent = totalAttempts;
         }
 
         // ===== FUNÇÃO PARA DOWNLOAD DO CERTIFICADO =====
@@ -879,8 +976,19 @@
             }, 'image/png');
         }
 
-        // Initialize lives display
-        updateLives();
+        // ===== INICIALIZAÇÃO =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar Supabase
+            initializeSupabase();
+            
+            // Configurar formatação do CPF
+            document.getElementById('playerCPF').addEventListener('input', function() {
+                formatCPF(this);
+            });
+            
+            // Initialize lives display
+            updateLives();
+        });
     </script>
 </body>
 </html>
