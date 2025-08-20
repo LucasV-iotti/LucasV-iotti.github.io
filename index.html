@@ -509,25 +509,25 @@
 
         const phases = [
             {
-                question: "Cliente: Olá, eu sou o Carlos Fernando Lima<br>Boa tarde, Fernando, seu CPF: 123.456.789-10<br>Tipo de atendimento: ______",
+                question: "Cliente: Olá, eu sou o Carlos Fernando Lima<br>Atendente: Boa tarde me chamo ******* falo em nome do Banco Santander. Me informe seu nome completo, data de nascimento e CPF para localizar suas informações<br>Cliente: Eu sou Carlos Fernando Lima, minha data de nascimento é 01/02/1983 e meu CPF 123.456.789-10<br>Tipo de atendimento: ______",
                 blanks: ["Receptivo"],
                 options: ["Ativo", "Receptivo"],
                 correctAnswers: ["Receptivo"]
             },
             {
-                question: "Boa tarde, eu falo com Carlos Fernando Lima?<br>Cliente: Sim<br>Farei uma breve confirmação dos seus dados para seguirmos com o atendimento seu ______ quais os dois últimos?<br>Cliente: 33<br>Sua data de nascimento é ______, qual o ano?<br>Tipo de atendimento: ______",
+                question: "Atendente: Boa tarde, eu falo com Carlos Fernando Lima?<br>Cliente: Sim<br>Atendente: Farei uma breve confirmação dos seus dados para seguirmos com o atendimento seu ______ quais os dois últimos?<br>Cliente: 33<br>Sua data de nascimento é ______, qual o ano?<br>Tipo de atendimento: ______",
                 blanks: ["CPF: 237689437-", "23/09", "Ativo"],
                 options: ["23/09", "23/09/1988", "1998", "CPF: 237689437-", "Filiação ou RG", "33", "Ativo", "Receptivo"],
                 correctAnswers: ["CPF: 237689437-", "23/09", "Ativo"]
             },
             {
-                question: "Boa tarde, eu falo com Carlos Fernando Lima?<br>Cliente: Sim<br>Farei uma breve confirmação dos seus dados para seguirmos com o atendimento seu ______ quais os dois últimos?<br>Cliente: 33<br>Sua ______, qual o ano?<br>Cliente: Já passei o CPF, você ainda quer nascimento, não vou passar.<br>Neste caso podemos trocar para ______<br>Cliente: Maria Letícia Lima.<br>Tipo de contato: ______",
-                blanks: ["CPF 237689437", "data de nascimento 23/09", "Filiação", "Ativo"],
+                question: "Atendente: Boa tarde, eu falo com Carlos Fernando Lima?<br>Cliente: Sim<br>Atendente: Farei uma breve confirmação dos seus dados, para seguirmos com o atendimento seu ______ quais os dois últimos?<br>Cliente: 33<br>Atendente: Sua ______, qual o ano?<br>Cliente: Já passei o CPF, você ainda quer nascimento, não vou passar.<br>Atendente: Neste caso podemos trocar para ______<br>Cliente: 12.345.678-9<br>Tipo de contato: ______",
+                blanks: ["CPF 237689437", "data de nascimento 23/09", "RG", "Ativo"],
                 options: ["data de nascimento 23/09", "1998", "CPF 237689437", "33", "Filiação", "RG", "Ativo", "Receptivo"],
-                correctAnswers: ["CPF 237689437", "data de nascimento 23/09", "Filiação", "Ativo"]
+                correctAnswers: ["CPF 237689437", "data de nascimento 23/09", "RG", "Ativo"]
             },
             {
-                question: "Farei uma breve confirmação dos seus dados para seguirmos com o atendimento seu ______ quais os dois últimos?<br>Cliente: 33<br>Sua data de nascimento é 23/09, qual o ano?<br>Cliente: Já passei o CPF, você ainda quer nascimento, não vou passar.<br>Neste caso podemos trocar para filiação. Qual o nome da sua mãe ou do seu pai?<br>Cliente: Prefiro não falar nada dos meus pais<br>Atendente: Tudo bem então, neste caso você pode me informar o ______<br>Tipo de contato: ______",
+                question: "Atendente: Farei uma breve confirmação dos seus dados, para seguirmos com o atendimento seu ______ quais os dois últimos?<br>Cliente: 33<br>Atendente: Sua data de nascimento é 23/09, qual o ano?<br>Cliente: Já passei o CPF, você ainda quer nascimento, não vou passar.<br>Atendente: Neste caso podemos trocar para ______. Pode me informar?<br>Cliente: Prefiro não passar mais informações de documentos.<br>Atendente: Tudo bem então, neste caso você pode me passar sua filiação?<br>Tipo de contato: ______",
                 blanks: ["CPF 237689437", "RG", "Ativo"],
                 options: ["23/09/1998", "data de nascimento 23/09", "CPF 237689437", "33", "Filiação", "RG", "Ativo", "Receptivo"],
                 correctAnswers: ["CPF 237689437", "RG", "Ativo"]
